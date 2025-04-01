@@ -47,14 +47,14 @@ jobs:
       - name: Bump version
         uses: Ikromov247/bump_version@v0.9.1
         with:
-          file: 'package.json'
+          file: 'package.json' # file containing your package version number
           bump_type: 'patch'  # Options: major, minor, patch, git
       
       - name: Commit changes
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add package.json # change file name here too
+          git add package.json # change file name here too <------------
           git commit -m "Bump version"
           git push
 
