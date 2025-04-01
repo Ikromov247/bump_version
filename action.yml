@@ -1,0 +1,19 @@
+name: 'Version Bumper'
+description: 'Bump version numbers in project files'
+inputs:
+  file:
+    description: 'Path to the file containing the version number'
+    required: true
+  bump_type:
+    description: 'Type of version bump (major, minor, patch, git)'
+    required: true
+    default: 'patch'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.file }}
+    - '--${{ inputs.bump_type }}'
+branding:
+  icon: 'arrow-up'
+  color: 'blue'
