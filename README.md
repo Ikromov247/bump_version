@@ -42,10 +42,10 @@ jobs:
           fetch-depth: 0  # Required for git versioning
       
       - name: Bump version
-        uses: ./  # Use local action
+        uses: Ikromov247/bump_version@v0.9.1 # change release version if needed
         with:
-          file: 'setup.py'
-          bump_type: 'minor'  # Options: major, minor, patch, git
+          file: 'package.json'
+          bump_type: 'patch'  # Options: major, minor, patch, git
       
       - name: Commit changes
         run: |
@@ -54,6 +54,7 @@ jobs:
           git add setup.py
           git commit -m "Bump version"
           git push
+
 ```
 
 ## Supported Version Formats
