@@ -33,6 +33,9 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read, write
+  
 jobs:
   bump-version:
     runs-on: ubuntu-latest
@@ -42,7 +45,7 @@ jobs:
           fetch-depth: 0  # Required for git versioning
       
       - name: Bump version
-        uses: Ikromov247/bump_version@v0.9.1 # change release version if needed
+        uses: Ikromov247/bump_version@v0.9.1
         with:
           file: 'package.json'
           bump_type: 'patch'  # Options: major, minor, patch, git
@@ -51,7 +54,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add setup.py
+          git add package.json
           git commit -m "Bump version"
           git push
 
