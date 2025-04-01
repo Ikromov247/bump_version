@@ -54,7 +54,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add package.json # change file name here too <------------
+          git add .
           git commit -m "Bump version"
           git push
 
