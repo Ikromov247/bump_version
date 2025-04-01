@@ -1,4 +1,4 @@
-name: 'Version Bumper'
+name: 'Simple Version Bumper'
 description: 'Bump version numbers in project files'
 inputs:
   file:
