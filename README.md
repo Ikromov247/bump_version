@@ -34,7 +34,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: read, write
+  contents: write
   
 jobs:
   bump-version:
@@ -54,7 +54,7 @@ jobs:
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add package.json
+          git add package.json # change file name here too
           git commit -m "Bump version"
           git push
 
