@@ -35,7 +35,7 @@ on:
 
 permissions:
   contents: write
-  
+
 jobs:
   bump-version:
     runs-on: ubuntu-latest
@@ -43,13 +43,13 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Required for git versioning
-      
+
       - name: Bump version
         uses: Ikromov247/bump_version@v0.9.1
         with:
           file: 'package.json'
           bump_type: 'patch'  # Options: major, minor, patch, git
-      
+
       - name: Commit changes
         run: |
           git config --local user.email "action@github.com"

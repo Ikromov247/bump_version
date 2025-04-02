@@ -27,14 +27,13 @@ def parse_version(version_str: str) -> Tuple[int, int, int]:
     match = re.search(r"(\d+)\.(\d+)\.(\d+)", version_str)
     if not match:
         raise ValueError(f"Invalid version format: {version_str}")
-    
+
     major, minor, patch = match.groups()
     return int(major), int(minor), int(patch)
 
 
 def bump_version(
     current_version: str,
-    major: bool = False,
     minor: bool = False,
     patch: bool = False,
     git_version: bool = False,
@@ -42,19 +41,15 @@ def bump_version(
     """Bump the version according to the specified flags."""
     if git_version:
         return get_git_version()
-    
+
     major_num, minor_num, patch_num = parse_version(current_version)
-    
-    if major:
-        major_num += 1
-        minor_num = 0
-        patch_num = 0
-    elif minor:
+
+    if minor:
         minor_num += 1
         patch_num = 0
     elif patch:
         patch_num += 1
-    
+
     return f"{major_num}.{minor_num}.{patch_num}"
 
 
@@ -62,7 +57,7 @@ def find_version_in_file(file_path: str) -> Optional[str]:
     """Find the version string in the specified file."""
     with open(file_path, "r") as f:
         content = f.read()
-    
+
     # Common version patterns
     patterns = [
         r'version\s*=\s*["\'](\d+\.\d+\.\d+)["\']',  # version = "1.2.3"
@@ -70,12 +65,12 @@ def find_version_in_file(file_path: str) -> Optional[str]:
         r'__version__\s*=\s*["\'](\d+\.\d+\.\d+)["\']',  # __version__ = "1.2.3"
         r'"version"\s*:\s*"(\d+\.\d+\.\d+)"',  # "version": "1.2.3"
     ]
-    
+
     for pattern in patterns:
         match = re.search(pattern, content)
         if match:
             return match.group(1)
-    
+
     return None
 
 
@@ -83,60 +78,70 @@ def update_version_in_file(file_path: str, old_version: str, new_version: str) -
     """Update the version in the specified file."""
     with open(file_path, "r") as f:
         content = f.read()
-    
+
     # Common version patterns to replace
     patterns = [
-        (f'version\\s*=\\s*["\']({re.escape(old_version)})["\']', f'version = "{new_version}"'),
-        (f'VERSION\\s*=\\s*["\']({re.escape(old_version)})["\']', f'VERSION = "{new_version}"'),
-        (f'__version__\\s*=\\s*["\']({re.escape(old_version)})["\']', f'__version__ = "{new_version}"'),
-        (f'"version"\\s*:\\s*"({re.escape(old_version)})"', f'"version": "{new_version}"'),
+        (
+            f"version\\s*=\\s*[\"']({re.escape(old_version)})[\"']",
+            f'version = "{new_version}"',
+        ),
+        (
+            f"VERSION\\s*=\\s*[\"']({re.escape(old_version)})[\"']",
+            f'VERSION = "{new_version}"',
+        ),
+        (
+            f"__version__\\s*=\\s*[\"']({re.escape(old_version)})[\"']",
+            f'__version__ = "{new_version}"',
+        ),
+        (
+            f'"version"\\s*:\\s*"({re.escape(old_version)})"',
+            f'"version": "{new_version}"',
+        ),
     ]
-    
+
     updated = False
     for pattern, replacement in patterns:
         new_content, count = re.subn(pattern, replacement, content)
         if count > 0:
             content = new_content
             updated = True
-    
+
     if updated:
         with open(file_path, "w") as f:
             f.write(content)
-    
+
     return updated
 
 
 def main():
     parser = argparse.ArgumentParser(description="Bump version in a file")
     parser.add_argument("file", help="Path to the file containing version")
-    parser.add_argument("--major", action="store_true", help="Bump major version")
     parser.add_argument("--minor", action="store_true", help="Bump minor version")
     parser.add_argument("--patch", action="store_true", help="Bump patch version")
     parser.add_argument("--git", action="store_true", help="Use git tag as version")
-    
+
     args = parser.parse_args()
-    
+
     if not os.path.exists(args.file):
         print(f"Error: File '{args.file}' not found")
         return 1
-    
+
     current_version = find_version_in_file(args.file)
     if not current_version:
         print(f"Error: No version found in '{args.file}'")
         return 1
-    
+
     # Default to patch bump if no specific bump type is provided
-    if not any([args.major, args.minor, args.patch, args.git]):
+    if not any([args.minor, args.patch, args.git]):
         args.patch = True
-    
+
     new_version = bump_version(
         current_version,
-        major=args.major,
         minor=args.minor,
         patch=args.patch,
         git_version=args.git,
     )
-    
+
     if update_version_in_file(args.file, current_version, new_version):
         print(f"Version bumped from {current_version} to {new_version}")
         return 0
