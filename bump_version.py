@@ -11,7 +11,7 @@ def get_git_version() -> str:
     try:
         # Get the most recent tag
         result = subprocess.run(
-            ["git", "describe", "--tags", "--abbrev=0"],
+            ["git", "describe", "--tags", "--abbrev=1"],
             check=True,
             capture_output=True,
             text=True,

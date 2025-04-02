@@ -5,7 +5,7 @@ inputs:
     description: 'Path to the file containing the version number'
     required: true
   bump_type:
-    description: 'Type of version bump (major, minor, patch, git)'
+    description: 'Type of version bump (minor, patch, git)'
     required: true
     default: 'patch'
 runs:
