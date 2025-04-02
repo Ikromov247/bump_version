@@ -16,7 +16,6 @@ A language-agnostic tool to bump version numbers in project files. It can be use
 python bump_version.py setup.py
 
 # Specific bump types
-python bump_version.py setup.py --major
 python bump_version.py setup.py --minor
 python bump_version.py setup.py --patch
 
