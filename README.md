@@ -4,7 +4,7 @@ A language-agnostic tool to bump version numbers in project files. It can be use
 
 ## Features
 
-- Bump major, minor, or patch versions (semantic versioning)
+- Bump minor, or patch versions (semantic versioning)
 - Automatically detects version patterns in files
 - Option to use Git tags as version source
 - Can be used as a GitHub Action or CLI tool
