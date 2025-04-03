@@ -1,6 +1,6 @@
 # Version Bumper
 
-A language-agnostic tool to bump version numbers in project files. It can be used locally or as a GitHub Action.
+A tool to bump version numbers in project files. It can be used locally or as a GitHub Action.
 
 ## Features
 
