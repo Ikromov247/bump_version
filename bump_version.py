@@ -4,6 +4,7 @@ import os
 import re
 import subprocess
 from typing import Optional, Tuple
+from sys import exit
 
 
 def get_git_version() -> str:
@@ -112,6 +113,26 @@ def update_version_in_file(file_path: str, old_version: str, new_version: str) -
 
     return updated
 
+def parse_config_file(config_path: os.PathLike):
+    if not os.path.exists(config_path):
+        raise FileNotFoundError(f"Config file {config_path} was not found")
+    
+    pass
+
+def parse_arguments(args: argparse.Namespace):
+    # check if config is given
+    if args.config:
+        config_path = args.config
+        config = parse_config_file(config_path)
+    ## if yes, use config
+    ### if other settings are given with config, raise warning and keep using config
+    ### if config not complete, raise error
+
+    ## if config is not given, use arguments
+    ### if arguments not complete, raise error
+
+    return # files, version bump type
+
 
 def main():
     parser = argparse.ArgumentParser(description="Bump version in a file")
@@ -119,9 +140,17 @@ def main():
     parser.add_argument("--minor", action="store_true", help="Bump minor version")
     parser.add_argument("--patch", action="store_true", help="Bump patch version")
     parser.add_argument("--git", action="store_true", help="Use git tag as version")
+    parser.add_argument("--config", help="Load settings from a config file")
 
     args = parser.parse_args()
 
+    target_files, bump_type =  parse_arguments(args) # raises FileNotFoundError if config path is given but file not found
+    # Default to patch bump if no specific bump type is provided
+    if not any([args.minor, args.patch, args.git]):
+        args.patch = True
+
+    # iteratie the target files, check if they exist
+    # if yes, bump their version
     if not os.path.exists(args.file):
         print(f"Error: File '{args.file}' not found")
         return 1
@@ -130,10 +159,6 @@ def main():
     if not current_version:
         print(f"Error: No version found in '{args.file}'")
         return 1
-
-    # Default to patch bump if no specific bump type is provided
-    if not any([args.minor, args.patch, args.git]):
-        args.patch = True
 
     new_version = bump_version(
         current_version,
