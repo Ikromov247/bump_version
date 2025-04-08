@@ -1,7 +1,7 @@
 #custom
 **/__pycache__/
 **/venv/
-dummy.py
+dummy*.py
 
 ##from template
 # Byte-compiled / optimized / DLL files

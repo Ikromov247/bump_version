@@ -5,7 +5,14 @@ import re
 import subprocess
 from typing import Optional, Tuple
 from sys import exit
+import yaml
+import warnings
 
+config_name_key = 'name'
+config_desc_key = 'description'
+settings_key = 'settings'
+bump_type_key = 'bump_type'
+files_key = 'files'
 
 def get_git_version() -> str:
     """Get the current git version from the repository."""
@@ -113,30 +120,78 @@ def update_version_in_file(file_path: str, old_version: str, new_version: str) -
 
     return updated
 
-def parse_config_file(config_path: os.PathLike):
-    if not os.path.exists(config_path):
+def parse_config_file(config_path: os.PathLike)->dict:
+    """
+    Open a yaml configuration file and return as a dict
+    Args:
+        config_path: os.PathLike
+    Returns:
+        dict
+        app config in dict structure
+    """
+    if not os.path.isfile(config_path):
         raise FileNotFoundError(f"Config file {config_path} was not found")
-    
-    pass
+    with open(config_path, 'r') as f:
+        config = yaml.safe_load(f)
+    return config
 
-def parse_arguments(args: argparse.Namespace):
+def validate_config(config: dict)->bool:
+    """
+    Checks if the config dict contains 
+    all required fields in the expected format
+    Returns:
+        bool
+    """
+    return True
+
+def parse_arguments(args: argparse.Namespace)->tuple[list, bool, bool, bool]:
     # check if config is given
     if args.config:
-        config_path = args.config
-        config = parse_config_file(config_path)
-    ## if yes, use config
-    ### if other settings are given with config, raise warning and keep using config
-    ### if config not complete, raise error
+        ## if yes, use config
+        config = parse_config_file(args.config )
+        ### if config not complete, raise error
+        if not validate_config(config):
+            raise ValueError("Config file is invalid")
+        ### if other settings are given with config, raise warning and keep using config
+        if args.file or args.minor or args.patch or args.git:
+            warnings.warn("Only one of config file or \
+                           cli arguments are needed. Ignoring cli arguments.")
+        bump_type = config[settings_key][bump_type_key]
+        is_minor, is_patch, is_git = set_bump_type(bump_type)
+        files = config[settings_key][files_key]
+
+        return files, is_minor, is_patch, is_git
 
     ## if config is not given, use arguments
-    ### if arguments not complete, raise error
+    else:
+        ### if arguments not complete, raise error
+        if not args.file:
+            raise ValueError(f"At least one file path must be provided when not using a config file")
+        return args.file, args.minor, args.patch, args.git
 
-    return # files, version bump type
-
+def set_bump_type(bump_type):
+    """
+    Convert string bump type to boolean flags
+    """
+    is_minor = False
+    is_patch = False
+    is_git = False
+    
+    if bump_type == 'minor':
+        is_minor = True
+    elif bump_type == 'patch': 
+        is_patch = True
+    elif bump_type == 'git':
+        is_git = True
+    else:
+        # Default to patch if unrecognized
+        is_patch = True
+    
+    return is_minor, is_patch, is_git
 
 def main():
     parser = argparse.ArgumentParser(description="Bump version in a file")
-    parser.add_argument("file", help="Path to the file containing version")
+    parser.add_argument("file", nargs='*', help="Path to the file containing version")
     parser.add_argument("--minor", action="store_true", help="Bump minor version")
     parser.add_argument("--patch", action="store_true", help="Bump patch version")
     parser.add_argument("--git", action="store_true", help="Use git tag as version")
@@ -144,36 +199,30 @@ def main():
 
     args = parser.parse_args()
 
-    target_files, bump_type =  parse_arguments(args) # raises FileNotFoundError if config path is given but file not found
-    # Default to patch bump if no specific bump type is provided
-    if not any([args.minor, args.patch, args.git]):
-        args.patch = True
+    target_files, is_minor, is_patch, is_git =  parse_arguments(args) # raises FileNotFoundError if config path is given but file not found
 
-    # iteratie the target files, check if they exist
-    # if yes, bump their version
-    if not os.path.exists(args.file):
-        print(f"Error: File '{args.file}' not found")
-        return 1
+    # iterate the target files, check if they exist
+    for file in target_files:
+        # if yes, bump their version
+        if not os.path.exists(file):
+            print(f"Error: File '{file}' not found")
+            return 1
 
-    current_version = find_version_in_file(args.file)
-    if not current_version:
-        print(f"Error: No version found in '{args.file}'")
-        return 1
+        current_version = find_version_in_file(file)
+        if not current_version:
+            raise ValueError(f"Error: No version found in '{file}'")
 
-    new_version = bump_version(
-        current_version,
-        minor=args.minor,
-        patch=args.patch,
-        git_version=args.git,
-    )
+        new_version = bump_version(
+            current_version,
+            minor=is_minor,
+            patch=is_patch,
+            git_version=is_git,
+        )
 
-    if update_version_in_file(args.file, current_version, new_version):
-        print(f"Version bumped from {current_version} to {new_version}")
-        return 0
-    else:
-        print(f"Error: Failed to update version in '{args.file}'")
-        return 1
-
+        if update_version_in_file(file, current_version, new_version):
+            print(f"Version bumped from {current_version} to {new_version}")
+        else:
+            print(f"Error: Failed to update version in '{file}'")
 
 if __name__ == "__main__":
     exit(main())
