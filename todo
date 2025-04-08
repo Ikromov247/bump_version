@@ -4,3 +4,7 @@
 4. Add dry run -
 5. Write changes in the changelog file (version name, date, commit messages since the last version) # this requires much work
 6. Add support for other versioning conventionsL 0ver (https://0ver.org/) and CalVer (https://calver.org/)
+7. add docs
+8. add contributing.md
+9. refactor code: break it down into several files and move into a core/ directory
+10. add better error handling, communicate the behavior to users in docs.

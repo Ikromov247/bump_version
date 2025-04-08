@@ -42,6 +42,7 @@ def parse_version(version_str: str) -> Tuple[int, int, int]:
 
 def bump_version(
     current_version: str,
+    major: bool = False,
     minor: bool = False,
     patch: bool = False,
     git_version: bool = False,
@@ -52,7 +53,11 @@ def bump_version(
 
     major_num, minor_num, patch_num = parse_version(current_version)
 
-    if minor:
+    if major:
+        major_num += 1
+        minor_num = 1
+        patch_num = 0
+    elif minor:
         minor_num += 1
         patch_num = 0
     elif patch:
@@ -157,17 +162,20 @@ def parse_arguments(args: argparse.Namespace)->tuple[list, bool, bool, bool]:
             warnings.warn("Only one of config file or \
                            cli arguments are needed. Ignoring cli arguments.")
         bump_type = config[settings_key][bump_type_key]
+        if bump_type=='major':
+            raise ValueError("Major version bumping is not supported with a config file. Use CLI instead")
         is_minor, is_patch, is_git = set_bump_type(bump_type)
+        is_major = False
         files = config[settings_key][files_key]
 
-        return files, is_minor, is_patch, is_git
+        return files, is_major, is_minor, is_patch, is_git
 
     ## if config is not given, use arguments
     else:
         ### if arguments not complete, raise error
         if not args.file:
             raise ValueError(f"At least one file path must be provided when not using a config file")
-        return args.file, args.minor, args.patch, args.git
+        return args.file, args.major, args.minor, args.patch, args.git
 
 def set_bump_type(bump_type):
     """
@@ -191,15 +199,16 @@ def set_bump_type(bump_type):
 
 def main():
     parser = argparse.ArgumentParser(description="Bump version in a file")
-    parser.add_argument("file", nargs='*', help="Path to the file containing version")
+    parser.add_argument("file", nargs='*', help="Path to the file(s) containing version")
+    parser.add_argument("--major", action="store_true", help="Bump major version")
     parser.add_argument("--minor", action="store_true", help="Bump minor version")
     parser.add_argument("--patch", action="store_true", help="Bump patch version")
     parser.add_argument("--git", action="store_true", help="Use git tag as version")
-    parser.add_argument("--config", help="Load settings from a config file")
+    parser.add_argument("--config", help="Load settings from a config file. Overrides cli arguments")
 
     args = parser.parse_args()
 
-    target_files, is_minor, is_patch, is_git =  parse_arguments(args) # raises FileNotFoundError if config path is given but file not found
+    target_files, is_major, is_minor, is_patch, is_git =  parse_arguments(args) # raises FileNotFoundError if config path is given but file not found
 
     # iterate the target files, check if they exist
     for file in target_files:
@@ -214,6 +223,7 @@ def main():
 
         new_version = bump_version(
             current_version,
+            major=is_major,
             minor=is_minor,
             patch=is_patch,
             git_version=is_git,
