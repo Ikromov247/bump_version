@@ -2,6 +2,7 @@
 **/__pycache__/
 **/venv/
 dummy*.py
+config.yml
 
 ##from template
 # Byte-compiled / optimized / DLL files

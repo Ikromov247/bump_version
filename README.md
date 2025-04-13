@@ -18,7 +18,7 @@ I have plans to publish it on pip soon.
 
 ### CLI Usage
 
-If you want to bump the version number in `setup.py`, 
+If you want to bump the version number in `setup.py`,
 
 ```bash
 # Bump patch version (default)
@@ -30,7 +30,7 @@ python main.py setup.py --minor # 1.2.3 -> 1.3.0
 python main.py setup.py --patch # 1.2.3 -> 1.2.4
 
 # Use Git tag as version, e.g. v0.9-19-g7e2d
-python main.py setup.py --git 
+python main.py setup.py --git
 
 # Pass several files to update
 python main.py setup.py README.md --patch
@@ -75,7 +75,7 @@ jobs:
 
 ### Config file
 
-You can also add your configurations in a `yaml` file instead of passing them as arguments. 
+You can also add your configurations in a `yaml` file instead of passing them as arguments.
 If you pass both the config file and the arguments, config file takes precedence and cli arguments will be ignored.
 
 Example configuration file:
@@ -113,10 +113,32 @@ The tool recognizes uses regex to recognize various version patterns:
 - `__version__ = "1.2.3"`
 - `"version": "1.2.3"` (for JSON/package.json)
 
+## Common errors
+
+- Invalid version format:
+  - Reason: the tool could not find the version number. Your version possibly does not match supported patterns.
+
+- File or permission errors:
+  - Reason: the tool could not open or write to specified files.
+  - Solution: check file paths and permissions.
+
+- Config file is invalid:
+  - Reason: your config file does not have required fields.
+  - Solution: check the sample config file for reference.
+
+- Major version bumping is not supported:
+  - Reason: Bumping major versions is only possible through cli to prevent accidental major version bumps.
+  - Solution: Use cli for major version bumps or set a different bump type
+
+- Error occured when reading the git tag:
+  - Reason: your repo does not have tags.
+  - Solution: create a tag.
+
+
 ## Contributing
 
-If you want to contribute, start from checking the `todo` file. 
-To suggest more features, create an issue with the tag `enhancement`.
+If you want to contribute, start from checking the `todo` file and the CONTRIBUTING.MD for rules.
+To suggest new features, create an issue with the tag `enhancement`.
 
 ## License
 

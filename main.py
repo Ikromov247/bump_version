@@ -2,10 +2,10 @@ import os
 from sys import exit
 import argparse
 
+from core.parse_arguments import parse_arguments
 from core.bump_version import (
-    parse_arguments,
     find_version_in_file,
-    bump_version,
+    bump_semantic_version,
     update_version_in_file,
 )
 
@@ -35,10 +35,8 @@ def main():
             return 1
 
         current_version = find_version_in_file(file)
-        if not current_version:
-            raise ValueError(f"Error: No version found in '{file}'")
 
-        new_version = bump_version(
+        new_version = bump_semantic_version(
             current_version,
             major=is_major,
             minor=is_minor,
