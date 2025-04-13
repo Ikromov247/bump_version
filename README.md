@@ -9,21 +9,26 @@ A tool to bump version numbers in project files. It can be used locally or as a 
 - Option to use Git tags as version source
 - Can be used as a GitHub Action or CLI tool
 
+# Installation
+
+For now, the tool is only available as a script or Github Actions tool (recommended).
+I have plans to publish it on pip soon.
+
 ## Usage
 
 ### CLI Usage
 
 ```bash
 # Bump patch version (default)
-python main.py setup.py
+python main.py setup.py # 1.2.3 -> 1.2.4
 
 # Specific bump types
-python main.py setup.py --major
-python main.py setup.py --minor
-python main.py setup.py --patch
+python main.py setup.py --major # 1.2.3 -> 2.0.0
+python main.py setup.py --minor # 1.2.3 -> 1.3.0
+python main.py setup.py --patch # 1.2.3 -> 1.2.4
 
 # Use Git tag as version, e.g. v0.9-19-g7e2d
-python main.py setup.py --git
+python main.py setup.py --git 
 
 # Pass several files to update
 python main.py setup.py README.md --patch
@@ -105,6 +110,11 @@ The tool recognizes uses regex to recognize various version patterns:
 - `VERSION = "1.2.3"`
 - `__version__ = "1.2.3"`
 - `"version": "1.2.3"` (for JSON/package.json)
+
+## Contributing
+
+If you want to contribute, start from checking the `todo` file. 
+To suggest more features, create an issue with the tag `enhancement`.
 
 ## License
 
