@@ -137,8 +137,8 @@ The tool recognizes uses regex to recognize various version patterns:
 
 ## Contributing
 
-If you want to contribute, start from checking the `todo` file.
-To suggest more features, create an issue with the tag `enhancement`.
+If you want to contribute, start from checking the `todo` file and the CONTRIBUTING.MD for rules.
+To suggest new features, create an issue with the tag `enhancement`.
 
 ## License
 
