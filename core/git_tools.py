@@ -1,5 +1,6 @@
 import subprocess
 
+
 def get_git_version() -> str:
     """
     Get the current git version from the repository.
@@ -23,5 +24,4 @@ def get_git_version() -> str:
         )
         return result.stdout.strip()
     except subprocess.CalledProcessError:
-        # If there are no tags yet, return a default version
-        return "0.0.0"
+        raise ValueError("Error occured when reading the git tag")

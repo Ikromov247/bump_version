@@ -2,6 +2,8 @@
 import re
 from typing import Optional, Tuple
 from core.git_tools import get_git_version
+from core.file_handler import read_file, write_to_file
+
 
 def parse_semantic_version(version_str: str) -> Tuple[int, int, int]:
     """Parse a semantic version string into its integer components."""
@@ -11,6 +13,7 @@ def parse_semantic_version(version_str: str) -> Tuple[int, int, int]:
 
     major, minor, patch = match.groups()
     return int(major), int(minor), int(patch)
+
 
 def bump_semantic_version(
     current_version: str,
@@ -40,8 +43,7 @@ def bump_semantic_version(
 
 def find_version_in_file(file_path: str) -> Optional[str]:
     """Find the version string in the specified file."""
-    with open(file_path, "r") as f:
-        content = f.read()
+    content = read_file(file_path)
 
     # Common version patterns
     patterns = [
@@ -61,8 +63,7 @@ def find_version_in_file(file_path: str) -> Optional[str]:
 
 def update_version_in_file(file_path: str, old_version: str, new_version: str) -> bool:
     """Update the version in the specified file."""
-    with open(file_path, "r") as f:
-        content = f.read()
+    content = read_file(file_path)
 
     # Common version patterns to replace
     patterns = [
@@ -92,9 +93,5 @@ def update_version_in_file(file_path: str, old_version: str, new_version: str) -
             updated = True
 
     if updated:
-        with open(file_path, "w") as f:
-            f.write(content)
-
+        write_to_file(file_path, content)
     return updated
-
-
