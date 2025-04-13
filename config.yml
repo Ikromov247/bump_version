@@ -1,0 +1,8 @@
+name: 'Patch bump'
+description: 'Bump the patch version in dummy.py'
+
+settings:
+  bump_type: minor
+  files:
+    - dummy.py
+    - dummy2.py

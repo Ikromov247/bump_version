@@ -9,21 +9,32 @@ A tool to bump version numbers in project files. It can be used locally or as a 
 - Option to use Git tags as version source
 - Can be used as a GitHub Action or CLI tool
 
-## CLI Usage
+# Installation
+
+For now, the tool is only available as a script or Github Actions tool (recommended).
+I have plans to publish it on pip soon.
+
+## Usage
+
+### CLI Usage
 
 ```bash
 # Bump patch version (default)
-python bump_version.py setup.py
+python main.py setup.py # 1.2.3 -> 1.2.4
 
 # Specific bump types
-python bump_version.py setup.py --minor
-python bump_version.py setup.py --patch
+python main.py setup.py --major # 1.2.3 -> 2.0.0
+python main.py setup.py --minor # 1.2.3 -> 1.3.0
+python main.py setup.py --patch # 1.2.3 -> 1.2.4
 
-# Use Git tag as version
-python bump_version.py setup.py --git
+# Use Git tag as version, e.g. v0.9-19-g7e2d
+python main.py setup.py --git 
+
+# Pass several files to update
+python main.py setup.py README.md --patch
 ```
 
-## GitHub Action Usage
+### GitHub Action Usage
 
 ```yaml
 name: Bump Version
@@ -32,6 +43,7 @@ on:
   push:
     branches: [main]
 
+# give permission to write and push commits
 permissions:
   contents: write
 
@@ -59,14 +71,50 @@ jobs:
 
 ```
 
+### Config file
+
+You can also add your configurations in a `yaml` file instead of passing them as arguments. 
+If you pass both the config file and the arguments, config file takes precedence and cli arguments will be ignored.
+
+Example configuration file:
+
+```yaml
+name: 'Patch bump' # Configuration name
+description: 'Bump the patch version in dummy.py' # description
+
+settings:
+  bump_type: patch
+  files: # list of files to update
+    - setup.py
+    - README.md
+```
+
+In cli, pass as an argument:
+```python main.py --config config.yml```
+
+In Github Actions workflow file:
+```yaml
+
+- name: Bump version
+  uses: Ikromov247/bump_version@v0.9
+  with:
+    config: bump_config.yml
+```
+
+
 ## Supported Version Formats
 
-The tool recognizes various version patterns:
+The tool recognizes uses regex to recognize various version patterns:
 
 - `version = "1.2.3"`
 - `VERSION = "1.2.3"`
 - `__version__ = "1.2.3"`
 - `"version": "1.2.3"` (for JSON/package.json)
+
+## Contributing
+
+If you want to contribute, start from checking the `todo` file. 
+To suggest more features, create an issue with the tag `enhancement`.
 
 ## License
 

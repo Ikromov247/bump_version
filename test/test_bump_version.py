@@ -2,7 +2,7 @@
 import os
 import unittest
 from unittest.mock import patch, mock_open
-import bump_version
+import core.bump_version as bump_version
 
 
 class TestBumpVersion(unittest.TestCase):
