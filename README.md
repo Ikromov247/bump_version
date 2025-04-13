@@ -24,6 +24,9 @@ python main.py setup.py --patch
 
 # Use Git tag as version, e.g. v0.9-19-g7e2d
 python main.py setup.py --git
+
+# Pass several files to update
+python main.py setup.py README.md --patch
 ```
 
 ### GitHub Action Usage
@@ -65,7 +68,8 @@ jobs:
 
 ### Config file
 
-You can add set your configurations in a `yaml` file instead of passing them as arguments. If you pass both the config file and the arguments, config file takes precedence and cli arguments will be ignored.
+You can also add your configurations in a `yaml` file instead of passing them as arguments. 
+If you pass both the config file and the arguments, config file takes precedence and cli arguments will be ignored.
 
 Example configuration file:
 
@@ -81,7 +85,7 @@ settings:
 ```
 
 In cli, pass as an argument:
-```python main.py config=config.yml```
+```python main.py --config config.yml```
 
 In Github Actions workflow file:
 ```yaml
