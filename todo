@@ -1,10 +1,3 @@
-User documentation
-- add better error handling, communicate the behavior to users in docs.
-
-Improved development
-- add contributing.md
-- refactor code: break it down into several files and move into a core/ directory +
-
 New features
 - if user passes git tagging and the current version is semantic, do not change anything
  - the user needs to pass --git --force if they wish to overwrite semantic version
