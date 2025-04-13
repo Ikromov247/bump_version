@@ -56,6 +56,8 @@ def bump_semantic_version(
         patch_num = 0
     elif patch:
         patch_num += 1
+    else:  # update patch number if all flags are false
+        patch_num += 1
 
     return f"{major_num}.{minor_num}.{patch_num}"
 
