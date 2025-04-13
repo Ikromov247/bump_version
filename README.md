@@ -18,6 +18,8 @@ I have plans to publish it on pip soon.
 
 ### CLI Usage
 
+If you want to bump the version number in `setup.py`, 
+
 ```bash
 # Bump patch version (default)
 python main.py setup.py # 1.2.3 -> 1.2.4
