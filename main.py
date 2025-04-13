@@ -35,8 +35,6 @@ def main():
             return 1
 
         current_version = find_version_in_file(file)
-        if not current_version:
-            raise ValueError(f"Error: No version found in '{file}'")
 
         new_version = bump_semantic_version(
             current_version,

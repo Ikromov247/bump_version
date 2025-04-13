@@ -12,10 +12,11 @@ def open_config_file(config_path: os.PathLike) -> dict:
     """
     Open a yaml configuration file and return as a dict
     Args:
-        config_path: os.PathLike
+        config_path(os.PathLike): path to config file
     Returns:
-        dict
-        app config in dict structure
+        dict: app config in dict structure
+    Raises:
+        FileNotFoundError: config file is not found
     """
     if not os.path.isfile(config_path):
         raise FileNotFoundError(f"Config file {config_path} was not found")
@@ -34,7 +35,20 @@ def validate_config(config: dict) -> bool:
     return True
 
 
-def parse_config_arguments(config_path):
+def parse_config_arguments(
+    config_path: os.PathLike,
+) -> tuple[list[str], bool, bool, bool, bool]:
+    """
+    Parse the arguments in the config file
+    Args:
+        config(os.PathLike): path to the config file
+    Returns:
+        tuple(list[str], bool, bool, bool, bool):
+        list of paths to files with version numbers and boolean flags for bump version type
+    Raises:
+        ValueError: config file is invalid
+        ValueError: major bump type provided in config file
+    """
     config = open_config_file(config_path)
     ### if config not complete, raise error
     if not validate_config(config):
@@ -50,9 +64,15 @@ def parse_config_arguments(config_path):
     return files, is_major, is_minor, is_patch, is_git
 
 
-def get_bump_flags(bump_type)->list[bool, bool, bool]:
+def get_bump_flags(bump_type: str) -> list[bool, bool, bool]:
     """
-    Convert string bump type to boolean flags
+    Convert string bump type to boolean flags.
+    If the version type is not recognized, set to patch
+    Args:
+        bump_type(str): bump type (major, minor, patch)
+    Returns:
+        list(bool, bool, bool):
+        List of boolean flags. Only one is true
     """
     is_minor = False
     is_patch = False
