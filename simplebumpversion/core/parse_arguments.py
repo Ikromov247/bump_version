@@ -1,6 +1,6 @@
 import warnings
 import argparse
-from core.config_handler import parse_config_arguments
+from simplebumpversion.core.config_handler import parse_config_arguments
 
 
 def parse_cli_arguments(

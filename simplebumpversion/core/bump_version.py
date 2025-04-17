@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 import re
 from typing import Optional, Tuple
-from core.git_tools import get_git_version
-from core.file_handler import read_file, write_to_file
+from simplebumpversion.core.git_tools import get_git_version
+from simplebumpversion.core.file_handler import read_file, write_to_file
 
 
 def parse_semantic_version(version_str: str) -> Tuple[int, int, int]:

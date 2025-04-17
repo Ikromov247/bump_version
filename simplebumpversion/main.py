@@ -2,8 +2,8 @@ import os
 from sys import exit
 import argparse
 
-from core.parse_arguments import parse_arguments
-from core.bump_version import (
+from simplebumpversion.core.parse_arguments import parse_arguments
+from simplebumpversion.core.bump_version import (
     find_version_in_file,
     bump_semantic_version,
     update_version_in_file,
