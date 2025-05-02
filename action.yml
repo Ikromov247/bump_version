@@ -27,7 +27,7 @@ runs:
     - name: Bump version with config
       if: inputs.config != ''
       shell: bash
-      run: simplebumpversion --config ${{ inputs.config }}
+      run: bump-version --config ${{ inputs.config }}
 
     - name: Bump version with direct inputs
       if: inputs.config == ''
