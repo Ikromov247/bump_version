@@ -1,5 +1,5 @@
 import os
-from sys import exit
+import sys
 import argparse
 
 from simplebumpversion.core.parse_arguments import parse_arguments
@@ -24,6 +24,11 @@ def main():
     )
 
     args = parser.parse_args()
+
+    if len(sys.argv) == 1:
+        # print help message when no args are provided
+        parser.print_help(sys.stderr)
+        sys.exit(1)
 
     target_files, is_major, is_minor, is_patch, is_git = parse_arguments(args)
 
@@ -51,4 +56,4 @@ def main():
 
 
 if __name__ == "__main__":
-    exit(main())
+    sys.exit(main())
