@@ -1,5 +1,5 @@
-name: 'Bump Version'
-description: 'Bump version in specified files using direct inputs or config file'
+name: 'Simple Version Bumper'
+description: 'Bump version numbers in project files'
 inputs:
   config:
     description: 'Path to config YAML file (overrides other inputs if provided)'
@@ -37,3 +37,7 @@ runs:
         # Convert comma-separated list to space-separated for the CLI
         FILES="${FILES//,/ }"
         simplebumpversion ${{ inputs.bump_type }} $FILES
+
+branding:
+  icon: 'arrow-up'
+  color: 'blue'
