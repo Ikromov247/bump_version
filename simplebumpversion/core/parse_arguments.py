@@ -1,6 +1,7 @@
 import warnings
 import argparse
 from simplebumpversion.core.config_handler import parse_config_arguments
+from simplebumpversion.core.exceptions import ArgumentsNotFound
 
 
 def parse_cli_arguments(
@@ -15,7 +16,7 @@ def parse_cli_arguments(
         tuple containing parsed arguments with file names and bump type flags
     """
     if not args.file:
-        raise ValueError(
+        raise ArgumentsNotFound(
             f"At least one file path must be provided when not using a config file"
         )
     return args.file, args.major, args.minor, args.patch, args.git

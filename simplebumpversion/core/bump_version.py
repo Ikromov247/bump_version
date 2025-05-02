@@ -3,6 +3,7 @@ import re
 from typing import Optional, Tuple
 from simplebumpversion.core.git_tools import get_git_version
 from simplebumpversion.core.file_handler import read_file, write_to_file
+from simplebumpversion.core.exceptions import NoValidVersionStr
 
 
 def parse_semantic_version(version_str: str) -> Tuple[int, int, int]:
@@ -89,7 +90,7 @@ def find_version_in_file(file_path: str) -> Optional[str]:
             break
 
     if version is None:
-        raise ValueError(f"Error: No version found in {file_path}")
+        raise NoValidVersionStr(f"Error: No version found in {file_path}")
 
     return version
 
