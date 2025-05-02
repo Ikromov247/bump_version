@@ -44,7 +44,7 @@ jobs:
           fi
 
       - name: Bump version
-        uses: Ikromov247/bump_version@v2.0.2
+        uses: Ikromov247/bump_version@main
         with:
           config: 'bump_config.yml'
 
