@@ -1,0 +1,7 @@
+name: 'Patch bump' # Configuration name
+description: 'Bump the patch version' # description
+
+settings:
+  bump_type: patch
+  files: # list of files to update
+    - pyproject.toml

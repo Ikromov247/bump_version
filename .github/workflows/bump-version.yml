@@ -28,7 +28,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Determine version bump type
+      - name: Determine version bump type from PR labels
         id: bump_type
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
@@ -46,8 +46,7 @@ jobs:
       - name: Bump version
         uses: Ikromov247/bump_version@v2.0.2
         with:
-          file: 'pyproject.toml'
-          bump_type: ${{ steps.bump_type.outputs.type }}
+          config: 'bump_config.yml'
 
       - name: Commit changes
         run: |

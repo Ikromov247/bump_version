@@ -1,23 +1,39 @@
-name: 'Simple Version Bumper'
-description: 'Bump version numbers in project files'
+name: 'Bump Version'
+description: 'Bump version in specified files using direct inputs or config file'
 inputs:
-  file:
-    description: 'Path to the file containing the version number'
+  config:
+    description: 'Path to config YAML file (overrides other inputs if provided)'
+    required: false
+  files:
+    description: 'Comma-separated list of files to update version in (ignored if config is provided)'
     required: false
   bump_type:
-    description: 'Type of version bump (minor, patch, git)'
+    description: 'Type of version bump (major/minor/patch) (ignored if config is provided)'
     required: false
     default: 'patch'
-  config:
-    description: 'Yaml file with configurations'
-    required: false
+
 runs:
-  using: 'docker'
-  image: 'Dockerfile'
-  args:
-    - ${{ inputs.file }}
-    - '--${{ inputs.bump_type }}'
-    - ${{ inputs.config }}
-branding:
-  icon: 'arrow-up'
-  color: 'blue'
+  using: "composite"
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.x'
+
+    - name: Install simplebumpversion
+      shell: bash
+      run: pip install simplebumpversion
+
+    - name: Bump version with config
+      if: inputs.config != ''
+      shell: bash
+      run: simplebumpversion --config ${{ inputs.config }}
+
+    - name: Bump version with direct inputs
+      if: inputs.config == ''
+      shell: bash
+      run: |
+        FILES="${{ inputs.files }}"
+        # Convert comma-separated list to space-separated for the CLI
+        FILES="${FILES//,/ }"
+        simplebumpversion ${{ inputs.bump_type }} $FILES
