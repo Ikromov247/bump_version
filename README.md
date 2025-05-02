@@ -20,20 +20,26 @@ I have plans to publish it on pip soon.
 
 If you want to bump the version number in `setup.py`,
 
+Install the package
+```bash
+pip install simplebumpversion
+```
+
+Then, in your code directory:
 ```bash
 # Bump patch version (default)
-python main.py setup.py # 1.2.3 -> 1.2.4
+bump-version setup.py # bumps 1.2.3 -> 1.2.4
 
 # Specific bump types
-python main.py setup.py --major # 1.2.3 -> 2.0.0
-python main.py setup.py --minor # 1.2.3 -> 1.3.0
-python main.py setup.py --patch # 1.2.3 -> 1.2.4
+bump-version setup.py --major # bumps 1.2.3 -> 2.0.0
+bump-version setup.py --minor # bumps 1.2.3 -> 1.3.0
+bump-version setup.py --patch # bumps 1.2.3 -> 1.2.4
 
 # Use Git tag as version, e.g. v0.9-19-g7e2d
-python main.py setup.py --git
+bump-version setup.py --git
 
 # Pass several files to update
-python main.py setup.py README.md --patch
+bump-version setup.py README.md --patch
 ```
 
 ### GitHub Action Usage
@@ -92,7 +98,7 @@ settings:
 ```
 
 In cli, pass as an argument:
-```python main.py --config config.yml```
+```bump-version --config config.yml```
 
 In Github Actions workflow file:
 ```yaml
