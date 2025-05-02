@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name            = "simplebumpversion"
+version         = "2.0.2"
+description     = "Bump version numbers across several files"
+readme          = "README.md"
+requires-python = ">=3.7"
+license         = { text = "MIT License" }
+authors         = [{ name = "Sukhrob Ikromov" }]
+dependencies    = ["PyYAML>=6.0.0"]
+urls            = { Repository = "https://github.com/Ikromov247/bump_version" }
+
+[project.scripts]
+bump-version = "simplebumpversion.main:main"
+
+[tool.setuptools.packages.find]
+where   = ["."]
+include = ["simplebumpversion*"]
