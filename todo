@@ -1,10 +1,7 @@
 New features
-- if user passes git tagging and the current version is semantic, do not change anything
- - the user needs to pass --git --force if they wish to overwrite semantic version
-- Write changes in the changelog file (version name, date, commit messages since the last version) # this requires much work
-- Add support for other versioning conventions: 
-  - 0ver (https://0ver.org/)
-  - CalVer (https://calver.org/)
-
-Packaging:
-- Publish the tool as a package on pip
+  - if user passes git tagging and the current version is semantic, do not change anything
+    - the user needs to pass --git --force if they wish to overwrite semantic version
+  - Write changes in the changelog file (version name, date, commit messages since the last version) # this requires much work
+  - Add support for other versioning conventions:
+    - 0ver (https://0ver.org/)
+    - CalVer (https://calver.org/)

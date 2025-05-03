@@ -4,10 +4,9 @@ A tool to bump version numbers in project files. It can be used locally or as a 
 
 ## Features
 
-- Bump minor, or patch versions (semantic versioning)
-- Automatically detects version patterns in files
+- Bump major, minor, or patch versions (semantic versioning)
 - Option to use Git tags as version source
-- Can be used as a GitHub Action or CLI tool
+- Can be used as a GitHub Action or from the command line
 
 # Installation
 
@@ -22,8 +21,6 @@ pip install simplebumpversion
 
 If you want to bump the version number in `setup.py`,
 
-
-Then, in your code directory:
 ```bash
 # Bump patch version (default)
 bump-version setup.py # bumps 1.2.3 -> 1.2.4
@@ -86,7 +83,7 @@ Example configuration file:
 
 ```yaml
 name: 'Patch bump' # Configuration name
-description: 'Bump the patch version in dummy.py' # description
+description: 'Bump the patch version in setup.py and README.mc' # description
 
 settings:
   bump_type: patch
@@ -95,12 +92,11 @@ settings:
     - README.md
 ```
 
-In cli, pass as an argument:
+In cli, pass the path to config file as an argument:
 ```bump-version --config config.yml```
 
-In Github Actions workflow file:
+Or use it in Github Actions workflow file:
 ```yaml
-
 - name: Bump version
   uses: Ikromov247/bump_version@v0.9
   with:
