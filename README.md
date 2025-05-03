@@ -11,8 +11,10 @@ A tool to bump version numbers in project files. It can be used locally or as a 
 
 # Installation
 
-For now, the tool is only available as a script or Github Actions tool (recommended).
-I have plans to publish it on pip soon.
+Install the package using pip:
+```bash
+pip install simplebumpversion
+```
 
 ## Usage
 
@@ -20,10 +22,6 @@ I have plans to publish it on pip soon.
 
 If you want to bump the version number in `setup.py`,
 
-Install the package
-```bash
-pip install simplebumpversion
-```
 
 Then, in your code directory:
 ```bash
