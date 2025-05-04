@@ -83,7 +83,7 @@ Example configuration file:
 
 ```yaml
 name: 'Patch bump' # Configuration name
-description: 'Bump the patch version in setup.py and README.mc' # description
+description: 'Bump the patch version in setup.py and README.md' # description
 
 settings:
   bump_type: patch
