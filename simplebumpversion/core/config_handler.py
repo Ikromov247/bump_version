@@ -6,6 +6,7 @@ config_desc_key = "description"
 settings_key = "settings"
 bump_type_key = "bump_type"
 files_key = "files"
+force_key = "force"
 
 
 def open_config_file(config_path: os.PathLike) -> dict:
@@ -37,7 +38,7 @@ def validate_config(config: dict) -> bool:
 
 def parse_config_arguments(
     config_path: os.PathLike,
-) -> tuple[list[str], bool, bool, bool, bool]:
+) -> tuple[list[str], bool, bool, bool, bool, bool]:
     """
     Parse the arguments in the config file
     Args:
@@ -61,7 +62,11 @@ def parse_config_arguments(
     is_minor, is_patch, is_git = get_bump_flags(bump_type)
     is_major = False
     files = config[settings_key][files_key]
-    return files, is_major, is_minor, is_patch, is_git
+    # Check if force flag is provided in config
+    is_force = False
+    if force_key in config[settings_key]:
+        is_force = bool(config[settings_key][force_key])
+    return files, is_major, is_minor, is_patch, is_git, is_force
 
 
 def get_bump_flags(bump_type: str) -> list[bool, bool, bool]:

@@ -5,3 +5,4 @@ settings:
   bump_type: patch
   files: # list of files to update
     - pyproject.toml
+  force: false # Set to true to force version change when current version is a git tag
