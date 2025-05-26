@@ -65,9 +65,9 @@ jobs:
           fetch-depth: 0  # Required for git versioning
 
       - name: Bump version
-        uses: Ikromov247/bump_version@v0.9
+        uses: Ikromov247/bump_version@v2.1.0
         with:
-          file: 'package.json' # file containing your package version number
+          files: 'package.json' # file containing your package version number
           bump_type: 'patch'  # Options: major, minor, patch, git
           force: true    # Optional: Force version change when current version is a git tag
 
