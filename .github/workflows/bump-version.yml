@@ -46,7 +46,8 @@ jobs:
       - name: Bump version
         uses: Ikromov247/bump_version@main
         with:
-          config: 'bump_config.yml'
+          file: 'pyproject.toml'
+          bump_type: ${{ steps.bump_type.outputs.type }}
 
       - name: Commit changes
         run: |
