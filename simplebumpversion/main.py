@@ -8,6 +8,7 @@ from simplebumpversion.core.bump_version import (
     bump_semantic_version,
     update_version_in_file,
 )
+from simplebumpversion.core.exceptions import NoValidVersionStr
 
 
 def main():

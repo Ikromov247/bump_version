@@ -102,7 +102,7 @@ def bump_semantic_version(
 
     if major:
         major_num += 1
-        minor_num = 1
+        minor_num = 0
         patch_num = 0
     elif minor:
         minor_num += 1
