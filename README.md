@@ -33,6 +33,12 @@ bump-version setup.py --patch # bumps 1.2.3 -> 1.2.4
 # Use Git tag as version, e.g. v0.9-19-g7e2d
 bump-version setup.py --git
 
+# Force the use of git tag when current version is semantic
+bump-version setup.py --git --force
+
+# Force conversion from git tag to semantic version
+bump-version setup.py --patch --force
+
 # Pass several files to update
 bump-version setup.py README.md --patch
 ```
@@ -63,6 +69,7 @@ jobs:
         with:
           file: 'package.json' # file containing your package version number
           bump_type: 'patch'  # Options: major, minor, patch, git
+          force: true    # Optional: Force version change when current version is a git tag
 
       - name: Commit changes
         run: |
@@ -90,6 +97,7 @@ settings:
   files: # list of files to update
     - setup.py
     - README.md
+  force: false # Set to true to force version change when current version is a git tag
 ```
 
 In cli, pass the path to config file as an argument:
@@ -117,6 +125,14 @@ The tool recognizes uses regex to recognize various version patterns:
 
 - Invalid version format:
   - Reason: the tool could not find the version number. Your version possibly does not match supported patterns.
+
+- Current version is a git tag:
+  - Reason: You're trying to bump a version that is currently a git tag.
+  - Solution: Use the `--force` flag to convert it to a semantic version.
+
+- Current version is semantic:
+  - Reason: You're trying to replace a semantic version with a git tag.
+  - Solution: Use `--git --force` to replace the semantic version with a git tag.
 
 - File or permission errors:
   - Reason: the tool could not open or write to specified files.
