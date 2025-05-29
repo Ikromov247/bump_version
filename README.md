@@ -106,7 +106,7 @@ In cli, pass the path to config file as an argument:
 Or use it in Github Actions workflow file:
 ```yaml
 - name: Bump version
-  uses: Ikromov247/bump_version@v0.9
+  uses: Ikromov247/bump_version@v2.1.0
   with:
     config: bump_config.yml
 ```
