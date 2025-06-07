@@ -2,6 +2,8 @@ import os
 import sys
 import argparse
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
 from simplebumpversion.core.parse_arguments import parse_arguments
 from simplebumpversion.core.bump_version import (
     find_version_in_file,
@@ -9,6 +11,13 @@ from simplebumpversion.core.bump_version import (
     update_version_in_file,
 )
 from simplebumpversion.core.exceptions import NoValidVersionStr
+from simplebumpversion.core.git_tools import (
+    get_latest_git_tag,
+    get_commits_since_tag,
+    update_git_tag,
+    if_any_updates,
+)
+from simplebumpversion.core.change_logger import write_changelog
 
 
 def main():
@@ -33,6 +42,18 @@ def main():
         "--config", help="Load settings from a config file. Overrides cli arguments"
     )
 
+    parser.add_argument(
+        "--change_msg", help="Change description string (can be multiline)"
+    )
+
+    parser.add_argument(
+        "--change_msg_file", help="Path to file containing changelog message"
+    )
+
+    parser.add_argument(
+        "--changelog", default="CHANGELOG.md", help="Path to changelog file"
+    )
+
     args = parser.parse_args()
 
     if len(sys.argv) == 1:
@@ -53,6 +74,9 @@ def main():
             current_version = find_version_in_file(file)
 
             try:
+                if not if_any_updates():
+                    print("No Updates since last version!")
+                    return
                 new_version = bump_semantic_version(
                     current_version,
                     major=is_major,
@@ -61,9 +85,43 @@ def main():
                     git_version=is_git,
                     force=is_force,
                 )
+                if is_major:
+                    update_type = "major"
+                elif is_minor:
+                    update_type = "minor"
+                elif is_patch:
+                    update_type = "patch"
+                else:
+                    update_type = None
 
                 if update_version_in_file(file, current_version, new_version):
                     print(f"Version bumped from {current_version} to {new_version}")
+                    tag = get_latest_git_tag()
+                    msg = get_commits_since_tag(tag)
+                    if args.change_msg_file:
+                        print("Using message from --change_msg_file")
+                        try:
+                            with open(args.change_msg_file, "r") as f:
+                                msg = f.read().strip()
+                        except FileNotFoundError:
+                            print(f"Error: File '{args.change_msg_file}' not found.")
+                            return 1
+                    elif args.change_msg:
+                        print("Using message from --change_msg")
+                        msg = args.change_msg.strip()
+
+                    # Only write changelog if message exists
+                    change_log_file = (
+                        args.changelog if args.changelog else "CHANGELOG.md"
+                    )
+                    if msg:
+                        write_changelog(
+                            new_version,
+                            change_log_file or "CHANGELOG.md",
+                            msg,
+                            update_type,
+                        )
+                    update_git_tag(new_version)
                 else:
                     print(f"Error: Failed to update version in '{file}'")
                     return 1

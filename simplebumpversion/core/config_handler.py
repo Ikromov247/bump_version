@@ -7,6 +7,7 @@ settings_key = "settings"
 bump_type_key = "bump_type"
 files_key = "files"
 force_key = "force"
+change_log_file_key = "change_log_file"
 
 
 def open_config_file(config_path: os.PathLike) -> dict:
@@ -24,6 +25,11 @@ def open_config_file(config_path: os.PathLike) -> dict:
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
     return config
+
+
+def write_config_file(config_path, config):
+    with open(config_path, "w") as f:
+        yaml.dump(config, f, sort_keys=False)
 
 
 def validate_config(config: dict) -> bool:
@@ -94,3 +100,24 @@ def get_bump_flags(bump_type: str) -> list[bool, bool, bool]:
         is_patch = True
 
     return is_minor, is_patch, is_git
+
+
+def get_change_log_file(config_path):
+    config = open_config_file(config_path)
+    change_log_file = config[settings_key][change_log_file_key]
+    return change_log_file
+
+
+def set_change_log_file(config_path, new_name):
+    config = open_config_file(config_path)
+    config[settings_key][change_log_file_key] = new_name
+    write_config_file(config_path, config)
+
+
+if __name__ == "__main__":
+    conf_dir = "/home/wsl/projects/forks/bump_version/bump_config.yml"
+    f = get_change_log_file(conf_dir)
+    print(f)
+    set_change_log_file(conf_dir, "new_config.md")
+    f = get_change_log_file(conf_dir)
+    print(f)
