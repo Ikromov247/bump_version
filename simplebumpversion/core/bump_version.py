@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import re
 from typing import Optional, Tuple
-from simplebumpversion.core.git_tools import get_git_version
+from simplebumpversion.core.git_tools import get_git_version, get_latest_git_tag
 from simplebumpversion.core.file_handler import read_file, write_to_file
 from simplebumpversion.core.exceptions import NoValidVersionStr
 
@@ -73,13 +73,13 @@ def bump_semantic_version(
     current_is_git_tag = is_git_tag_version(current_version)
 
     # If user wants to use git version, return git tag
-    if git_version:
-        # If current version is already semantic and force is not provided, raise error
-        if not current_is_git_tag and not force:
-            raise ValueError(
-                "Current version is semantic. Use --git --force to replace it with a git tag."
-            )
-        return get_git_version()
+    # if git_version:
+    #     # If current version is already semantic and force is not provided, raise error
+    #     if not current_is_git_tag and not force:
+    #         raise ValueError(
+    #             "Current version is semantic. Use --git --force to replace it with a git tag."
+    #         )
+    #     return get_latest_git_tag()
 
     # If current version is a git tag and we're trying to convert to semantic without force
     if current_is_git_tag and not force:
@@ -99,7 +99,6 @@ def bump_semantic_version(
     else:
         # Normal semantic version handling
         major_num, minor_num, patch_num = parse_semantic_version(current_version)
-
     if major:
         major_num += 1
         minor_num = 0
