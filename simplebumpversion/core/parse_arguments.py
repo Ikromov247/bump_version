@@ -6,25 +6,25 @@ from simplebumpversion.core.exceptions import ArgumentsNotFound
 
 def parse_cli_arguments(
     args: argparse.Namespace,
-) -> tuple[list, bool, bool, bool]:
+) -> tuple[list, bool, bool, bool, bool]:
     """
     Parse command line arguments from argparse.Namespace object
     Args:
         args(argparse.Namespace):
     Returns:
-        tuple(list, bool, bool, bool):
+        tuple(list, bool, bool, bool, bool):
         tuple containing parsed arguments with file names and bump type flags
     """
     if not args.file:
         raise ArgumentsNotFound(
             f"At least one file path must be provided when not using a config file"
         )
-    return args.file, args.major, args.minor, args.patch
+    return args.file, args.major, args.minor, args.patch, args.dry_run
 
 
 def parse_arguments(
     args: argparse.Namespace,
-) -> tuple[list, bool, bool, bool]:
+) -> tuple[list, bool, bool, bool, bool]:
     """
     Wrapper function to parse arguments from various sources.
     Args:

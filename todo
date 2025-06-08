@@ -1,5 +1,4 @@
 New features
-  - Write changes in the changelog file (version name, date, commit messages since the last version) # this requires much work
   - Add support for other versioning conventions:
     - 0ver (https://0ver.org/)
     - CalVer (https://calver.org/)

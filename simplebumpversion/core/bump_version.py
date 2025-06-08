@@ -126,7 +126,9 @@ def find_version_in_file(file_path: str) -> str:
     return version
 
 
-def update_version_in_file(file_path: str, old_version: str, new_version: str) -> bool:
+def update_version_in_file(
+    file_path: str, old_version: str, new_version: str, is_dry_run: bool
+) -> bool:
     """
     Update the version in the specified file.
     Args:
@@ -165,6 +167,6 @@ def update_version_in_file(file_path: str, old_version: str, new_version: str) -
             content = new_content
             updated = True
 
-    if updated:
+    if updated and not is_dry_run:
         write_to_file(file_path, content)
     return updated

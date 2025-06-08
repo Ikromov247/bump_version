@@ -45,6 +45,12 @@ def main():
         "--changelog", default="CHANGELOG.md", help="Path to changelog file"
     )
 
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Doesn't change the version file, prints what will happen",
+    )
+
     args = parser.parse_args()
 
     if len(sys.argv) == 1:
@@ -52,7 +58,10 @@ def main():
         parser.print_help(sys.stderr)
         sys.exit(1)
 
-    target_files, is_major, is_minor, is_patch = parse_arguments(args)
+    target_files, is_major, is_minor, is_patch, is_dry_run = parse_arguments(args)
+
+    if is_dry_run:
+        print("# DRY RUN MODE - no changes will be made")
 
     # iterate the target files, check if they exist
     for file in target_files:
@@ -80,7 +89,11 @@ def main():
                 else:
                     update_type = None
 
-                if update_version_in_file(file, current_version, new_version):
+                updated = update_version_in_file(
+                    file, current_version, new_version, is_dry_run
+                )
+
+                if updated:
                     print(f"Version bumped from {current_version} to {new_version}")
                     tag = get_latest_git_tag()
                     msg = get_commits_since_tag(tag)
@@ -101,13 +114,16 @@ def main():
                         args.changelog if args.changelog else "CHANGELOG.md"
                     )
                     if msg:
-                        write_changelog(
+                        changelog_message = write_changelog(
                             new_version,
                             change_log_file or "CHANGELOG.md",
                             msg,
                             update_type,
+                            is_dry_run,
                         )
-                    update_git_tag(new_version)
+                        print(f"Changelog updated with: \n {changelog_message}")
+                    if not is_dry_run:
+                        update_git_tag(new_version)
                 else:
                     print(f"Error: Failed to update version in '{file}'")
                     return 1

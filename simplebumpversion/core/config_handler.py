@@ -44,7 +44,7 @@ def validate_config(config: dict) -> bool:
 
 def parse_config_arguments(
     config_path: os.PathLike,
-) -> tuple[list[str], bool, bool, bool]:
+) -> tuple[list[str], bool, bool, bool, bool]:
     """
     Parse the arguments in the config file
     Args:
@@ -56,6 +56,7 @@ def parse_config_arguments(
         ValueError: config file is invalid
         ValueError: major bump type provided in config file
     """
+    is_dry_run = False
     config = open_config_file(config_path)
     ### if config not complete, raise error
     if not validate_config(config):
@@ -69,7 +70,7 @@ def parse_config_arguments(
     is_major = False
     files = config[settings_key][files_key]
 
-    return files, is_major, is_minor, is_patch
+    return files, is_major, is_minor, is_patch, is_dry_run
 
 
 def get_bump_flags(bump_type: str) -> tuple[bool, bool]:
