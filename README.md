@@ -5,7 +5,8 @@ A tool for developers to instantly bump version numbers in project files. It can
 ## Features
 
 - Bump major, minor, or patch versions (semantic versioning)
-- Option to use Git tags as version source
+- Automatically creates Git tags
+- Creates and updates a changelog file with list of commits since the last git tag
 - Can be used as a GitHub Action or from the command line
 
 # Installation
@@ -29,15 +30,6 @@ bump-version setup.py # bumps 1.2.3 -> 1.2.4
 bump-version setup.py --major # bumps 1.2.3 -> 2.0.0
 bump-version setup.py --minor # bumps 1.2.3 -> 1.3.0
 bump-version setup.py --patch # bumps 1.2.3 -> 1.2.4
-
-# Use Git tag as version, e.g. v0.9-19-g7e2d
-bump-version setup.py --git
-
-# Force the use of git tag when current version is semantic
-bump-version setup.py --git --force
-
-# Force conversion from git tag to semantic version
-bump-version setup.py --patch --force
 
 # Pass several files to update
 bump-version setup.py README.md --patch
@@ -125,14 +117,6 @@ The tool recognizes uses regex to recognize various version patterns:
 
 - Invalid version format:
   - Reason: the tool could not find the version number. Your version possibly does not match supported patterns.
-
-- Current version is a git tag:
-  - Reason: You're trying to bump a version that is currently a git tag.
-  - Solution: Use the `--force` flag to convert it to a semantic version.
-
-- Current version is semantic:
-  - Reason: You're trying to replace a semantic version with a git tag.
-  - Solution: Use `--git --force` to replace the semantic version with a git tag.
 
 - File or permission errors:
   - Reason: the tool could not open or write to specified files.

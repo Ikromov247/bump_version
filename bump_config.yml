@@ -4,5 +4,4 @@ settings:
   bump_type: patch
   files:
   - pyproject.toml
-  force: false
   change_log_file: CHANGELOG.md

@@ -8,13 +8,9 @@ inputs:
     description: 'Comma-separated list of files to update version in (ignored if config is provided)'
     required: false
   bump_type:
-    description: 'Type of version bump (major/minor/patch/git) (ignored if config is provided)'
+    description: 'Type of version bump (major/minor/patch) (ignored if config is provided)'
     required: false
     default: 'patch'
-  force:
-    description: 'Force version change when current version is a git tag or when switching to git tag from semantic version'
-    required: false
-    default: 'false'
 
 runs:
   using: "composite"
@@ -41,24 +37,16 @@ runs:
         # Convert comma-separated list to space-separated for the CLI
         FILES="${FILES//,/ }"
 
-        # Handle force flag
-        FORCE_FLAG=""
-        if [[ "${{ inputs.force }}" == "true" ]]; then
-          FORCE_FLAG="--force"
-        fi
-
         # Handle bump type
         if [[ "${{ inputs.bump_type }}" == "major" ]]; then
-          bump-version $FILES --major $FORCE_FLAG
+          bump-version $FILES --major
         elif [[ "${{ inputs.bump_type }}" == "minor" ]]; then
-          bump-version $FILES --minor $FORCE_FLAG
+          bump-version $FILES --minor
         elif [[ "${{ inputs.bump_type }}" == "patch" ]]; then
-          bump-version $FILES --patch $FORCE_FLAG
-        elif [[ "${{ inputs.bump_type }}" == "git" ]]; then
-          bump-version $FILES --git $FORCE_FLAG
+          bump-version $FILES --patch
         else
           # Default to patch
-          bump-version $FILES --patch $FORCE_FLAG
+          bump-version $FILES --patch
         fi
 
 branding:
