@@ -1,8 +1,8 @@
-name: 'Patch bump' # Configuration name
-description: 'Bump the patch version' # description
-
+name: Patch bump
+description: Bump the patch version
 settings:
   bump_type: patch
-  files: # list of files to update
-    - pyproject.toml
-  force: false # Set to true to force version change when current version is a git tag
+  files:
+  - pyproject.toml
+  force: false
+  change_log_file: CHANGELOG.md
