@@ -55,4 +55,4 @@ jobs:
           git config --local user.name "GitHub Action"
           git add .
           git commit -m "Bump version [skip ci]"
-          git push
+          git push origin main
