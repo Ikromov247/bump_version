@@ -47,12 +47,7 @@ def is_git_tag_version(version_str: str) -> bool:
 
 
 def bump_semantic_version(
-    current_version: str,
-    major: bool = False,
-    minor: bool = False,
-    patch: bool = False,
-    git_version: bool = False,
-    force: bool = False,
+    current_version: str, major: bool = False, minor: bool = False, patch: bool = False
 ) -> str:
     """
     Bump the version according to the specified flags.
@@ -61,44 +56,11 @@ def bump_semantic_version(
         major(bool): bump major version
         minor(bool): bump minor version
         patch(bool): bump patch version
-        git_version(bool): use git tag as version
-        force(bool): force version change, even if current version is a git tag
     Returns:
         str: upgraded version as string, e.g. 1.2.4
-    Raises:
-        ValueError: If trying to use git tag on a semantic version without force flag
-                   or trying to change from git tag to semantic without force flag
     """
-    # Check if current version is a git tag
-    current_is_git_tag = is_git_tag_version(current_version)
-
-    # If user wants to use git version, return git tag
-    # if git_version:
-    #     # If current version is already semantic and force is not provided, raise error
-    #     if not current_is_git_tag and not force:
-    #         raise ValueError(
-    #             "Current version is semantic. Use --git --force to replace it with a git tag."
-    #         )
-    #     return get_latest_git_tag()
-
-    # If current version is a git tag and we're trying to convert to semantic without force
-    if current_is_git_tag and not force:
-        raise ValueError(
-            "Current version is a git tag. Use --force to convert it to a semantic version."
-        )
-
-    # If current version is a git tag and force is provided, try to extract a semantic version
-    if current_is_git_tag and force:
-        # Try to extract semantic version from git tag
-        match = re.search(r"(\d+)\.(\d+)\.(\d+)", current_version)
-        if match:
-            major_num, minor_num, patch_num = map(int, match.groups())
-        else:
-            # If no semantic version found in git tag, default to 0.1.0
-            major_num, minor_num, patch_num = 0, 1, 0
-    else:
-        # Normal semantic version handling
-        major_num, minor_num, patch_num = parse_semantic_version(current_version)
+    # Normal semantic version handling
+    major_num, minor_num, patch_num = parse_semantic_version(current_version)
     if major:
         major_num += 1
         minor_num = 0
@@ -114,7 +76,7 @@ def bump_semantic_version(
     return f"{major_num}.{minor_num}.{patch_num}"
 
 
-def find_version_in_file(file_path: str) -> Optional[str]:
+def find_version_in_file(file_path: str) -> str:
     """
     Find the version string in the specified file.
     Args:
@@ -164,7 +126,9 @@ def find_version_in_file(file_path: str) -> Optional[str]:
     return version
 
 
-def update_version_in_file(file_path: str, old_version: str, new_version: str) -> bool:
+def update_version_in_file(
+    file_path: str, old_version: str, new_version: str, is_dry_run: bool
+) -> bool:
     """
     Update the version in the specified file.
     Args:
@@ -203,6 +167,6 @@ def update_version_in_file(file_path: str, old_version: str, new_version: str) -
             content = new_content
             updated = True
 
-    if updated:
+    if updated and not is_dry_run:
         write_to_file(file_path, content)
     return updated
