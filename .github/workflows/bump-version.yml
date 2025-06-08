@@ -42,7 +42,13 @@ jobs:
               echo "type=patch" >> $GITHUB_OUTPUT
             fi
           fi
-
+          
+      - name: Set git configurations
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
+          
       - name: Bump version
         uses: Ikromov247/bump_version@main
         with:
@@ -51,9 +57,6 @@ jobs:
 
       - name: Commit changes
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
           git add .
           git commit -m "Bump version [skip ci]"
           git push origin main
