@@ -6,7 +6,7 @@ config_desc_key = "description"
 settings_key = "settings"
 bump_type_key = "bump_type"
 files_key = "files"
-force_key = "force"
+
 change_log_file_key = "change_log_file"
 
 
@@ -44,7 +44,7 @@ def validate_config(config: dict) -> bool:
 
 def parse_config_arguments(
     config_path: os.PathLike,
-) -> tuple[list[str], bool, bool, bool, bool, bool]:
+) -> tuple[list[str], bool, bool, bool]:
     """
     Parse the arguments in the config file
     Args:
@@ -65,41 +65,35 @@ def parse_config_arguments(
         raise ValueError(
             "Major version bumping is not supported with a config file. Use CLI instead"
         )
-    is_minor, is_patch, is_git = get_bump_flags(bump_type)
+    is_minor, is_patch = get_bump_flags(bump_type)
     is_major = False
     files = config[settings_key][files_key]
-    # Check if force flag is provided in config
-    is_force = False
-    if force_key in config[settings_key]:
-        is_force = bool(config[settings_key][force_key])
-    return files, is_major, is_minor, is_patch, is_git, is_force
+
+    return files, is_major, is_minor, is_patch
 
 
-def get_bump_flags(bump_type: str) -> list[bool, bool, bool]:
+def get_bump_flags(bump_type: str) -> tuple[bool, bool]:
     """
     Convert string bump type to boolean flags.
     If the version type is not recognized, set to patch
     Args:
         bump_type(str): bump type (major, minor, patch)
     Returns:
-        list(bool, bool, bool):
+        list(bool, bool):
         List of boolean flags. Only one is true
     """
     is_minor = False
     is_patch = False
-    is_git = False
 
     if bump_type == "minor":
         is_minor = True
     elif bump_type == "patch":
         is_patch = True
-    elif bump_type == "git":
-        is_git = True
     else:
         # Default to patch if unrecognized
         is_patch = True
 
-    return is_minor, is_patch, is_git
+    return is_minor, is_patch
 
 
 def get_change_log_file(config_path):

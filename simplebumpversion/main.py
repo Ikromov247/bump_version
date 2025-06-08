@@ -28,16 +28,7 @@ def main():
     parser.add_argument("--major", action="store_true", help="Bump major version")
     parser.add_argument("--minor", action="store_true", help="Bump minor version")
     parser.add_argument("--patch", action="store_true", help="Bump patch version")
-    parser.add_argument(
-        "--git",
-        action="store_true",
-        help="Use git tag as version (requires --force if current version is semantic)",
-    )
-    parser.add_argument(
-        "--force",
-        action="store_true",
-        help="Force version change when current version is a git tag or when switching from semantic to git tag",
-    )
+
     parser.add_argument(
         "--config", help="Load settings from a config file. Overrides cli arguments"
     )
@@ -61,7 +52,7 @@ def main():
         parser.print_help(sys.stderr)
         sys.exit(1)
 
-    target_files, is_major, is_minor, is_patch, is_git, is_force = parse_arguments(args)
+    target_files, is_major, is_minor, is_patch = parse_arguments(args)
 
     # iterate the target files, check if they exist
     for file in target_files:
@@ -78,12 +69,7 @@ def main():
                     print("No Updates since last version!")
                     return
                 new_version = bump_semantic_version(
-                    current_version,
-                    major=is_major,
-                    minor=is_minor,
-                    patch=is_patch,
-                    git_version=is_git,
-                    force=is_force,
+                    current_version, major=is_major, minor=is_minor, patch=is_patch
                 )
                 if is_major:
                     update_type = "major"
