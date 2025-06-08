@@ -17,7 +17,9 @@ def parse_semantic_version(version_str: str) -> Tuple[int, int, int]:
     Raises:
         ValueError:
     """
-    match = re.search(r"(\d+)\.(\d+)\.(\d+)", version_str)
+    match = re.fullmatch(
+        r"v?(\d+)\.(\d+)\.(\d+)", version_str
+    )  # supports both 1.2.3 and v.1.2.3 formats
     if not match:
         raise ValueError(f"Invalid version format: {version_str}")
 
@@ -59,8 +61,15 @@ def bump_semantic_version(
     Returns:
         str: upgraded version as string, e.g. 1.2.4
     """
+    has_v_prefix = current_version.startswith("v")
     # Normal semantic version handling
-    major_num, minor_num, patch_num = parse_semantic_version(current_version)
+    try:
+        major_num, minor_num, patch_num = parse_semantic_version(current_version)
+    except ValueError:
+        raise ValueError(
+            f"Cannot bump version: '{current_version}' is not a valid semantic version (e.g. '1.2.3')"
+        )
+
     if major:
         major_num += 1
         minor_num = 0
@@ -73,7 +82,8 @@ def bump_semantic_version(
     else:  # update patch number if all flags are false
         patch_num += 1
 
-    return f"{major_num}.{minor_num}.{patch_num}"
+    bumped_version = f"{major_num}.{minor_num}.{patch_num}"
+    return f"v{bumped_version}" if has_v_prefix else bumped_version
 
 
 def find_version_in_file(file_path: str) -> str:
