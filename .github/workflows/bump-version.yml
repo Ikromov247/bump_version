@@ -62,4 +62,4 @@ jobs:
         run: |
           git add .
           git commit -m "Bump version [skip ci]"
-          git push origin main
+          git push origin --tags
