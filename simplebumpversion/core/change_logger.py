@@ -1,7 +1,6 @@
 import os
 from datetime import datetime
-import subprocess
-import re
+from simplebumpversion.core.file_handler import read_file, write_to_file
 
 
 def write_changelog(new_version, changelog_path, message, update_type, is_dry_run):
@@ -10,13 +9,11 @@ def write_changelog(new_version, changelog_path, message, update_type, is_dry_ru
     new_entry += "\n\n"
 
     if os.path.exists(changelog_path):
-        with open(changelog_path, "r") as f:
-            old_content = f.read()
+        old_content = read_file(changelog_path)
     else:
         old_content = ""
 
     if not is_dry_run:
-        with open(changelog_path, "w") as f:
-            f.write(new_entry + old_content)
+        write_to_file(changelog_path, new_entry + old_content)
 
     return new_entry

@@ -7,7 +7,7 @@ name            = "simplebumpversion"
 version = "3.0.1"
 description     = "Bump version numbers across several files"
 readme          = "README.md"
-requires-python = ">=3.7"
+requires-python = ">=3.9"
 license         = { text = "MIT License" }
 authors         = [{ name = "Sukhrob Ikromov" }]
 dependencies    = ["PyYAML>=6.0.0"]

@@ -19,6 +19,11 @@ on:
 permissions:
   contents: write
 
+# never run two bumps at the same time, or both would compute the same version
+concurrency:
+  group: bump-version
+  cancel-in-progress: false
+
 jobs:
   bump-version:
     if: github.event.pull_request.merged == true || github.event_name == 'workflow_dispatch'
@@ -26,41 +31,46 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          # check out the tip of the target branch so the bump commit can be pushed to it
+          ref: ${{ github.event.pull_request.base.ref || github.ref_name }}
           fetch-depth: 0
 
       - name: Determine version bump type from PR labels
         id: bump_type
-        run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "type=${{ inputs.bump_type }}" >> $GITHUB_OUTPUT
-          else
-            if [ "${{ contains(github.event.pull_request.labels.*.name, 'major') }}" == "true" ]; then
-              echo "type=major" >> $GITHUB_OUTPUT
-            elif [ "${{ contains(github.event.pull_request.labels.*.name, 'minor') }}" == "true" ]; then
-              echo "type=minor" >> $GITHUB_OUTPUT
-            else
-              echo "type=patch" >> $GITHUB_OUTPUT
-            fi
-          fi
-          
-      - name: Set git configurations
         env:
-           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          DISPATCH_BUMP_TYPE: ${{ inputs.bump_type }}
+          HAS_MAJOR_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'major') }}
+          HAS_MINOR_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'minor') }}
         run: |
-           git config --local user.email "action@github.com"
-           git config --local user.name "GitHub Action"
-           # Reset remote to point to current repository
-           git remote set-url origin https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git
-          
+          if [ "$EVENT_NAME" == "workflow_dispatch" ]; then
+            echo "type=$DISPATCH_BUMP_TYPE" >> "$GITHUB_OUTPUT"
+          elif [ "$HAS_MAJOR_LABEL" == "true" ]; then
+            echo "type=major" >> "$GITHUB_OUTPUT"
+          elif [ "$HAS_MINOR_LABEL" == "true" ]; then
+            echo "type=minor" >> "$GITHUB_OUTPUT"
+          else
+            echo "type=patch" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set git configurations
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
       - name: Bump version
-        uses: Ikromov247/bump_version@main
+        id: bump
+        # use this repository's own action so changes to it are tested here
+        uses: ./
         with:
           files: 'pyproject.toml'
           bump_type: ${{ steps.bump_type.outputs.type }}
+          # a manual run is an explicit request to bump, even without new commits
+          force: ${{ github.event_name == 'workflow_dispatch' }}
 
-      - name: Commit changes
-        run: |
-          git add .
-          git commit -m "Bump version [skip ci]"
-          git push origin main
-          git push origin --tags
+      - name: Push changes
+        if: steps.bump.outputs.bumped == 'true'
+        env:
+          TARGET_BRANCH: ${{ github.event.pull_request.base.ref || github.ref_name }}
+          TAG: ${{ steps.bump.outputs.new_version }}
+        run: git push --atomic origin "HEAD:refs/heads/$TARGET_BRANCH" "refs/tags/$TAG"

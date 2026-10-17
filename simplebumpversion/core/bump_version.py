@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 import re
 from typing import Optional, Tuple
-from simplebumpversion.core.git_tools import get_git_version, get_latest_git_tag
 from simplebumpversion.core.file_handler import read_file, write_to_file
 from simplebumpversion.core.exceptions import NoValidVersionStr
 
@@ -86,54 +85,61 @@ def bump_semantic_version(
     return f"v{bumped_version}" if has_v_prefix else bumped_version
 
 
+# Each pattern captures (prefix)(version)(suffix). The lookbehind stops
+# keys such as "target-version" or "python_version" from matching.
+_VERSION_KEY_PATTERNS = [
+    r"((?<![\w.\-])version\s*=\s*[\"'])({version})([\"'])",  # version = "1.2.3"
+    r"((?<![\w.\-])VERSION\s*=\s*[\"'])({version})([\"'])",  # VERSION = "1.2.3"
+    r"((?<![\w.\-])__version__\s*=\s*[\"'])({version})([\"'])",  # __version__ = "1.2.3"
+    r'("version"\s*:\s*")({version})(")',  # "version": "1.2.3"
+]
+
+# strict semantic versions are preferred over anything else
+_SEMANTIC_VERSION = r"v?\d+\.\d+\.\d+"
+# more flexible format that can match git tags, e.g. v1.2.3-19-gabc123
+_FLEXIBLE_VERSION = r"[\w.\-]+"
+
+
 def find_version_in_file(file_path: str) -> str:
     """
     Find the version string in the specified file.
     Args:
         file_path(str): Path to the file containing the version number.
     Returns:
-        str|None: version number string or None
+        str: version number string
     Raises:
         NoValidVersionStr: version number pattern is not found in the file
     """
     content = read_file(file_path)
 
-    # Common semantic version patterns (strict semantic versioning)
-    semantic_patterns = [
-        r'version\s*=\s*["\'](\d+\.\d+\.\d+)["\']',  # version = "1.2.3"
-        r'VERSION\s*=\s*["\'](\d+\.\d+\.\d+)["\']',  # VERSION = "1.2.3"
-        r'__version__\s*=\s*["\'](\d+\.\d+\.\d+)["\']',  # __version__ = "1.2.3"
-        r'"version"\s*:\s*"(\d+\.\d+\.\d+)"',  # "version": "1.2.3"
-    ]
-
-    # More flexible patterns that can match git tags or other version formats
-    flexible_patterns = [
-        r'version\s*=\s*["\']([\w\.\-]+)["\']',  # version = "v1.2.3-19-gabc123"
-        r'VERSION\s*=\s*["\']([\w\.\-]+)["\']',  # VERSION = "v1.2.3-19-gabc123"
-        r'__version__\s*=\s*["\']([\w\.\-]+)["\']',  # __version__ = "v1.2.3-19-gabc123"
-        r'"version"\s*:\s*"([\w\.\-]+)"',  # "version": "v1.2.3-19-gabc123"
-    ]
-
-    # First try to find a semantic version
-    version = None
-    for pattern in semantic_patterns:
-        match = re.search(pattern, content)
-        if match:
-            version = match.group(1)
-            break
-
-    # If no semantic version found, try flexible patterns that can match git tags
-    if version is None:
-        for pattern in flexible_patterns:
-            match = re.search(pattern, content)
+    for version_pattern in (_SEMANTIC_VERSION, _FLEXIBLE_VERSION):
+        for pattern in _VERSION_KEY_PATTERNS:
+            match = re.search(pattern.format(version=version_pattern), content)
             if match:
-                version = match.group(1)
-                break
+                return match.group(2)
 
-    if version is None:
-        raise NoValidVersionStr(f"Error: No version found in {file_path}")
+    raise NoValidVersionStr(f"No version found in {file_path}")
 
-    return version
+
+def replace_version(
+    content: str, old_version: str, new_version: str
+) -> Tuple[str, bool]:
+    """
+    Replace the first occurrence of old_version in a version assignment,
+    keeping the original quoting and spacing.
+    Args:
+        content(str): file content
+        old_version(str): old version number string
+        new_version(str): the new version number string
+    Returns:
+        tuple(str, bool): updated content and whether a replacement was made
+    """
+    for pattern in _VERSION_KEY_PATTERNS:
+        match = re.search(pattern.format(version=re.escape(old_version)), content)
+        if match:
+            start, end = match.span(2)
+            return content[:start] + new_version + content[end:], True
+    return content, False
 
 
 def update_version_in_file(
@@ -145,38 +151,11 @@ def update_version_in_file(
         file_path(str): path to the file to update
         old_version(str): old version number string
         new_version(str): the new version number string
+        is_dry_run(bool): don't write the changes if True
     Returns:
         bool: whether version update was successful
     """
-    content = read_file(file_path)
-
-    # Common version patterns to replace, works for both semantic versions and git tags
-    patterns = [
-        (
-            f"version\\s*=\\s*[\"']({re.escape(old_version)})[\"']",
-            f'version = "{new_version}"',
-        ),
-        (
-            f"VERSION\\s*=\\s*[\"']({re.escape(old_version)})[\"']",
-            f'VERSION = "{new_version}"',
-        ),
-        (
-            f"__version__\\s*=\\s*[\"']({re.escape(old_version)})[\"']",
-            f'__version__ = "{new_version}"',
-        ),
-        (
-            f'"version"\\s*:\\s*"({re.escape(old_version)})"',
-            f'"version": "{new_version}"',
-        ),
-    ]
-
-    updated = False
-    for pattern, replacement in patterns:
-        new_content, count = re.subn(pattern, replacement, content)
-        if count > 0:
-            content = new_content
-            updated = True
-
+    content, updated = replace_version(read_file(file_path), old_version, new_version)
     if updated and not is_dry_run:
         write_to_file(file_path, content)
     return updated

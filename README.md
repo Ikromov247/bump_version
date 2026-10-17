@@ -5,7 +5,7 @@ A tool for developers to instantly bump version numbers in project files. It can
 ## Features
 
 - Bump major, minor, or patch versions (semantic versioning)
-- Automatically creates Git tags
+- Commits the bump and tags the new commit (`--commit`)
 - Creates and updates a changelog file with list of commits since the last git tag
 - Can be used as a GitHub Action or from the command line
 
@@ -31,9 +31,24 @@ bump-version setup.py --major # bumps 1.2.3 -> 2.0.0
 bump-version setup.py --minor # bumps 1.2.3 -> 1.3.0
 bump-version setup.py --patch # bumps 1.2.3 -> 1.2.4
 
-# Pass several files to update
+# Pass several files to update (they must all contain the same version)
 bump-version setup.py README.md --patch
+
+# Commit the changed files and changelog, then tag the new commit
+bump-version setup.py --patch --commit
+
+# See what would change without changing anything
+bump-version setup.py --patch --dry-run
 ```
+
+Other options:
+
+- `--changelog PATH`: changelog file to update (default `CHANGELOG.md`)
+- `--change_msg TEXT` / `--change_msg_file PATH`: use this text for the changelog entry instead of the commits since the last tag
+- `--force`: bump even if there are no new commits since the last tag
+
+Without `--commit`, the files and changelog are changed but nothing is committed or tagged.
+Automated `[skip ci]` commits, such as earlier bump commits, are left out of the changelog.
 
 ### GitHub Action Usage
 
@@ -52,31 +67,38 @@ jobs:
   bump-version:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Required for git versioning
+          fetch-depth: 0  # Required to find the last tag
 
-      - name: Bump version
-        uses: Ikromov247/bump_version@v2.1.0
-        with:
-          files: 'package.json' # file containing your package version number
-          bump_type: 'patch'  # Options: major, minor, patch, git
-          force: true    # Optional: Force version change when current version is a git tag
-
-      - name: Commit changes
+      - name: Set git configurations
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add .
-          git commit -m "Bump version"
-          git push
 
+      - name: Bump version
+        id: bump
+        uses: Ikromov247/bump_version@main
+        with:
+          files: 'package.json' # comma-separated files containing your package version number
+          bump_type: 'patch'  # Options: major, minor, patch
+          # commit: 'true'    # Optional: commit and tag the bump (default true)
+          # force: 'false'    # Optional: bump even without new commits since the last tag
+          # dry_run: 'false'  # Optional: only print what would change
+
+      - name: Push changes
+        if: steps.bump.outputs.bumped == 'true'
+        run: git push --atomic origin HEAD:main "refs/tags/${{ steps.bump.outputs.new_version }}"
 ```
+
+The action outputs `bumped` (`'true'` or `'false'`), `previous_version` and `new_version`.
+If there are no new commits since the last tag, nothing is bumped and `bumped` is `'false'`.
 
 ### Config file
 
 You can also add your configurations in a `yaml` file instead of passing them as arguments.
-If you pass both the config file and the arguments, config file takes precedence and cli arguments will be ignored.
+If you pass both the config file and the arguments, the files and bump type from the config file are used and those cli arguments are ignored.
+Run options such as `--dry-run`, `--commit` and `--force` still apply.
 
 Example configuration file:
 
@@ -89,7 +111,7 @@ settings:
   files: # list of files to update
     - setup.py
     - README.md
-  force: false # Set to true to force version change when current version is a git tag
+  change_log_file: CHANGELOG.md # optional
 ```
 
 In cli, pass the path to config file as an argument:
@@ -130,9 +152,15 @@ The tool recognizes uses regex to recognize various version patterns:
   - Reason: Bumping major versions is only possible through cli to prevent accidental major version bumps.
   - Solution: Use cli for major version bumps or set a different bump type
 
-- Error occured when reading the git tag:
-  - Reason: your repo does not have tags.
-  - Solution: create a tag.
+- Files contain different versions:
+  - Reason: all files passed in one run must contain the same version.
+  - Solution: make the versions match before bumping.
+
+- Git tag already exists:
+  - Reason: the new version was already tagged.
+  - Solution: check the version in your files against your tags.
+
+If your repo has no tags yet, all commits are treated as new.
 
 
 ## Contributing

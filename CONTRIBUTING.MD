@@ -12,7 +12,7 @@ This is mostly a pet project, so feel free to contribute whatever!
 ## Getting Started
 
 ### Prerequisites
-- Python 3.6+
+- Python 3.9+
 - Git
 - PyYAML
 - pre-commit
