@@ -2,15 +2,39 @@ name: 'Simple Version Bumper'
 description: 'Bump version numbers in project files'
 inputs:
   config:
-    description: 'Path to config YAML file (overrides other inputs if provided)'
+    description: 'Path to config YAML file (overrides files and bump_type if provided)'
     required: false
+    default: ''
   files:
     description: 'Comma-separated list of files to update version in (ignored if config is provided)'
     required: false
+    default: ''
   bump_type:
     description: 'Type of version bump (major/minor/patch) (ignored if config is provided)'
     required: false
     default: 'patch'
+  commit:
+    description: 'Commit the changes and tag the new commit (requires git user.name/user.email to be set). Pushing is left to the workflow'
+    required: false
+    default: 'true'
+  force:
+    description: 'Bump even if there are no new commits since the last tag'
+    required: false
+    default: 'false'
+  dry_run:
+    description: 'Print what would change without changing anything'
+    required: false
+    default: 'false'
+outputs:
+  bumped:
+    description: "'true' if the version was bumped, 'false' otherwise"
+    value: ${{ steps.bump.outputs.bumped }}
+  previous_version:
+    description: 'Version before the bump'
+    value: ${{ steps.bump.outputs.previous_version }}
+  new_version:
+    description: 'Version after the bump (also the name of the created tag)'
+    value: ${{ steps.bump.outputs.new_version }}
 
 runs:
   using: "composite"
@@ -22,32 +46,60 @@ runs:
 
     - name: Install simplebumpversion
       shell: bash
-      run: pip install simplebumpversion
+      # install from the action's own source so the code matches the ref the workflow uses
+      run: pip install "$GITHUB_ACTION_PATH"
 
-    - name: Bump version with config
-      if: inputs.config != ''
+    - name: Bump version
+      id: bump
       shell: bash
-      run: bump-version --config ${{ inputs.config }}
-
-    - name: Bump version with direct inputs
-      if: inputs.config == ''
-      shell: bash
+      env:
+        INPUT_CONFIG: ${{ inputs.config }}
+        INPUT_FILES: ${{ inputs.files }}
+        INPUT_BUMP_TYPE: ${{ inputs.bump_type }}
+        INPUT_COMMIT: ${{ inputs.commit }}
+        INPUT_FORCE: ${{ inputs.force }}
+        INPUT_DRY_RUN: ${{ inputs.dry_run }}
       run: |
-        FILES="${{ inputs.files }}"
-        # Convert comma-separated list to space-separated for the CLI
-        FILES="${FILES//,/ }"
+        set -euo pipefail
+        args=()
 
-        # Handle bump type
-        if [[ "${{ inputs.bump_type }}" == "major" ]]; then
-          bump-version $FILES --major
-        elif [[ "${{ inputs.bump_type }}" == "minor" ]]; then
-          bump-version $FILES --minor
-        elif [[ "${{ inputs.bump_type }}" == "patch" ]]; then
-          bump-version $FILES --patch
+        if [[ -n "$INPUT_CONFIG" ]]; then
+          args+=(--config "$INPUT_CONFIG")
         else
-          # Default to patch
-          bump-version $FILES --patch
+          # Convert comma-separated list to separate arguments, trimming whitespace
+          IFS=',' read -ra files <<< "$INPUT_FILES"
+          for file in "${files[@]}"; do
+            file="${file#"${file%%[![:space:]]*}"}"
+            file="${file%"${file##*[![:space:]]}"}"
+            if [[ -n "$file" ]]; then
+              args+=("$file")
+            fi
+          done
+          if [[ ${#args[@]} -eq 0 ]]; then
+            echo "::error::Either 'config' or 'files' must be provided"
+            exit 1
+          fi
+
+          case "$INPUT_BUMP_TYPE" in
+            major|minor|patch) args+=("--$INPUT_BUMP_TYPE") ;;
+            *)
+              echo "::error::Invalid bump_type '$INPUT_BUMP_TYPE' (expected major, minor or patch)"
+              exit 1
+              ;;
+          esac
         fi
+
+        if [[ "$INPUT_COMMIT" == "true" ]]; then
+          args+=(--commit)
+        fi
+        if [[ "$INPUT_FORCE" == "true" ]]; then
+          args+=(--force)
+        fi
+        if [[ "$INPUT_DRY_RUN" == "true" ]]; then
+          args+=(--dry-run)
+        fi
+
+        bump-version "${args[@]}"
 
 branding:
   icon: 'arrow-up'
